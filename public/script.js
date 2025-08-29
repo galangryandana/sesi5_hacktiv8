@@ -2,6 +2,23 @@ const form = document.getElementById("chat-form");
 const input = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
 
+/**
+ * A simple function to convert markdown-like syntax to HTML.
+ * It handles bolding (**text**) and newlines.
+ * NOTE: This uses innerHTML. For a production app, consider a more
+ * robust sanitizing library (like DOMPurify) to prevent X-Site-Scripting (XSS)
+ * if the AI response could be manipulated to include malicious scripts.
+ * @param {string} text The text to convert.
+ * @returns {string} The converted HTML string.
+ */
+function renderSimpleMarkdown(text) {
+  // Convert **bold** text to <strong> tags
+  let html = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  // Convert newlines to <br> for proper line breaks in HTML
+  html = html.replace(/\n/g, "<br>");
+  return html;
+}
+
 form.addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -32,8 +49,8 @@ form.addEventListener("submit", async function (e) {
     const data = await response.json();
 
     if (data && data.result) {
-      // Update the "Thinking..." message with the AI's reply
-      thinkingMsgElement.textContent = data.result;
+      // Update the "Thinking..." message with the AI's reply, rendering basic markdown
+      thinkingMsgElement.innerHTML = renderSimpleMarkdown(data.result);
     } else {
       // Handle case where response is ok, but no result is found
       thinkingMsgElement.textContent = "Sorry, no response received.";
